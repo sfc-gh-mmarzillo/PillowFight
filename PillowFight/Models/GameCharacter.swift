@@ -43,28 +43,37 @@ enum GameCharacter: String, CaseIterable, Identifiable {
     
     var shirtColor: UIColor {
         switch self {
-        case .theo: return UIColor.systemBlue
-        case .ben: return UIColor.systemRed
-        case .chuck: return UIColor.systemGreen
-        case .stella: return UIColor.systemPurple
+        case .theo: return UIColor(red: 0.0, green: 0.6, blue: 0.6, alpha: 1.0) // Teal/green shirt
+        case .ben: return UIColor(red: 0.9, green: 0.45, blue: 0.35, alpha: 1.0) // Coral/salmon (Cubs Hawaiian shirt base)
+        case .chuck: return UIColor(red: 0.18, green: 0.42, blue: 0.22, alpha: 1.0) // Dark forest green hoodie
+        case .stella: return UIColor(red: 0.75, green: 0.55, blue: 0.58, alpha: 1.0) // Dusty rose/mauve top
         }
     }
     
     var hairColor: UIColor {
         switch self {
-        case .theo: return UIColor.brown
-        case .ben: return UIColor.brown
-        case .chuck: return UIColor(red: 0.95, green: 0.85, blue: 0.4, alpha: 1.0) // Blonde
-        case .stella: return UIColor(red: 0.55, green: 0.27, blue: 0.07, alpha: 1.0) // Dark brown
+        case .theo: return UIColor(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0) // Blonde/light straight hair
+        case .ben: return UIColor(red: 0.45, green: 0.3, blue: 0.15, alpha: 1.0) // Brown mullet hair
+        case .chuck: return UIColor(red: 0.95, green: 0.85, blue: 0.4, alpha: 1.0) // Blonde curly
+        case .stella: return UIColor(red: 0.5, green: 0.3, blue: 0.15, alpha: 1.0) // Medium brown/auburn
+        }
+    }
+    
+    var hairHighlightColor: UIColor {
+        switch self {
+        case .theo: return UIColor(red: 0.95, green: 0.88, blue: 0.6, alpha: 1.0) // Lighter blonde
+        case .ben: return UIColor(red: 0.55, green: 0.38, blue: 0.2, alpha: 1.0) // Lighter brown
+        case .chuck: return UIColor(red: 1.0, green: 0.92, blue: 0.55, alpha: 1.0) // Bright blonde highlight
+        case .stella: return UIColor(red: 0.65, green: 0.4, blue: 0.2, alpha: 1.0) // Auburn/caramel highlights
         }
     }
     
     var pantsColor: UIColor {
         switch self {
         case .theo: return UIColor.darkGray
-        case .ben: return UIColor(red: 0.3, green: 0.3, blue: 0.5, alpha: 1.0)
-        case .chuck: return UIColor(red: 0.4, green: 0.3, blue: 0.2, alpha: 1.0)
-        case .stella: return UIColor.systemPink
+        case .ben: return UIColor(red: 0.3, green: 0.3, blue: 0.5, alpha: 1.0) // Dark jeans
+        case .chuck: return UIColor(red: 0.22, green: 0.48, blue: 0.28, alpha: 1.0) // Matching green hoodie pants
+        case .stella: return UIColor(red: 0.35, green: 0.45, blue: 0.6, alpha: 1.0) // Denim blue jeans
         }
     }
     
@@ -80,10 +89,10 @@ enum GameCharacter: String, CaseIterable, Identifiable {
     // Character portrait colors for SwiftUI views
     var portraitGradient: [Color] {
         switch self {
-        case .theo: return [.blue, .cyan]
-        case .ben: return [.red, .orange]
-        case .chuck: return [.green, .mint]
-        case .stella: return [.purple, .pink]
+        case .theo: return [.teal, .cyan]
+        case .ben: return [Color(red: 0.9, green: 0.45, blue: 0.35), .orange]
+        case .chuck: return [Color(red: 0.18, green: 0.42, blue: 0.22), .mint]
+        case .stella: return [Color(red: 0.75, green: 0.55, blue: 0.58), .pink]
         }
     }
 }

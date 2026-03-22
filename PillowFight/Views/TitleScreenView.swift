@@ -221,7 +221,7 @@ struct CharacterAvatar: View {
             Text("🟡")
                 .font(.system(size: size * 0.25))
         case .stella:
-            Text("🎀")
+            Text("💎")
                 .font(.system(size: size * 0.3))
         }
     }

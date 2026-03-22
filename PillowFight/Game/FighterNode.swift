@@ -136,11 +136,8 @@ class FighterNode: SKNode {
         rightPupil.strokeColor = .clear
         addChild(rightPupil)
         
-        // Mouth
-        let mouth = SKShapeNode(rect: CGRect(x: -4, y: 36, width: 8, height: 2), cornerRadius: 1)
-        mouth.fillColor = UIColor(red: 0.8, green: 0.3, blue: 0.3, alpha: 1)
-        mouth.strokeColor = .clear
-        addChild(mouth)
+        // Mouth - character specific
+        buildMouth()
         
         // Arms
         leftArmNode = SKShapeNode(rect: CGRect(x: -22, y: 0, width: 8, height: 22), cornerRadius: 3)
@@ -190,16 +187,91 @@ class FighterNode: SKNode {
         self.xScale = facingRight ? scale : -scale
     }
     
+    private func buildMouth() {
+        let mouthColor = UIColor(red: 0.8, green: 0.3, blue: 0.3, alpha: 1.0)
+        
+        switch character {
+        case .theo:
+            // Normal small smile
+            let mouth = SKShapeNode(rect: CGRect(x: -4, y: 36, width: 8, height: 2), cornerRadius: 1)
+            mouth.fillColor = mouthColor
+            mouth.strokeColor = .clear
+            addChild(mouth)
+            
+        case .ben:
+            // Big open smile with missing front teeth
+            let mouthBg = SKShapeNode(rect: CGRect(x: -5, y: 34, width: 10, height: 5), cornerRadius: 2)
+            mouthBg.fillColor = UIColor(red: 0.6, green: 0.15, blue: 0.15, alpha: 1.0) // Dark mouth interior
+            mouthBg.strokeColor = mouthColor
+            mouthBg.lineWidth = 1
+            addChild(mouthBg)
+            
+            // White teeth on sides (gap in the middle = missing front teeth)
+            let leftTooth = SKShapeNode(rect: CGRect(x: -4, y: 36, width: 2, height: 3), cornerRadius: 0.5)
+            leftTooth.fillColor = .white
+            leftTooth.strokeColor = UIColor.lightGray
+            leftTooth.lineWidth = 0.5
+            addChild(leftTooth)
+            
+            let rightTooth = SKShapeNode(rect: CGRect(x: 2, y: 36, width: 2, height: 3), cornerRadius: 0.5)
+            rightTooth.fillColor = .white
+            rightTooth.strokeColor = UIColor.lightGray
+            rightTooth.lineWidth = 0.5
+            addChild(rightTooth)
+            
+        case .chuck:
+            // Big wide grin with missing front teeth - gap-toothed smile
+            let mouthBg = SKShapeNode(rect: CGRect(x: -6, y: 34, width: 12, height: 5), cornerRadius: 2)
+            mouthBg.fillColor = UIColor(red: 0.6, green: 0.15, blue: 0.15, alpha: 1.0)
+            mouthBg.strokeColor = mouthColor
+            mouthBg.lineWidth = 1
+            addChild(mouthBg)
+            
+            // Teeth with gap in center (missing front teeth)
+            let toothPositions: [(CGFloat, CGFloat)] = [(-5, 36), (-3, 36), (3, 36), (5, 36)]
+            for pos in toothPositions {
+                let tooth = SKShapeNode(rect: CGRect(x: pos.0 - 1, y: pos.1, width: 2, height: 3), cornerRadius: 0.5)
+                tooth.fillColor = .white
+                tooth.strokeColor = UIColor.lightGray
+                tooth.lineWidth = 0.5
+                addChild(tooth)
+            }
+            // The gap in the middle (x: -1 to 1) has no teeth
+            
+        case .stella:
+            // Smile with braces
+            let mouth = SKShapeNode(rect: CGRect(x: -5, y: 35, width: 10, height: 3), cornerRadius: 1)
+            mouth.fillColor = mouthColor
+            mouth.strokeColor = .clear
+            addChild(mouth)
+            
+            // Braces - thin silver/gray metallic line across teeth
+            let bracesWire = SKShapeNode(rect: CGRect(x: -5, y: 36, width: 10, height: 1))
+            bracesWire.fillColor = UIColor(red: 0.75, green: 0.77, blue: 0.8, alpha: 0.9) // Silver/metallic
+            bracesWire.strokeColor = .clear
+            addChild(bracesWire)
+            
+            // Small brackets on the braces
+            let bracketPositions: [CGFloat] = [-4, -2, 0, 2, 4]
+            for x in bracketPositions {
+                let bracket = SKShapeNode(rect: CGRect(x: x - 0.5, y: 35.5, width: 1, height: 2))
+                bracket.fillColor = UIColor(red: 0.7, green: 0.72, blue: 0.75, alpha: 1.0)
+                bracket.strokeColor = .clear
+                addChild(bracket)
+            }
+        }
+    }
+    
     private func buildHair() {
         switch character {
         case .theo:
-            // Short brown hair
+            // Blonde straight hair with side-swept bangs
             let hair = SKShapeNode(path: {
                 let path = UIBezierPath()
-                path.move(to: CGPoint(x: -14, y: 48))
-                path.addQuadCurve(to: CGPoint(x: 14, y: 48), controlPoint: CGPoint(x: 0, y: 62))
-                path.addLine(to: CGPoint(x: 12, y: 44))
-                path.addLine(to: CGPoint(x: -12, y: 44))
+                path.move(to: CGPoint(x: -15, y: 48))
+                path.addQuadCurve(to: CGPoint(x: 15, y: 48), controlPoint: CGPoint(x: 0, y: 63))
+                path.addLine(to: CGPoint(x: 13, y: 44))
+                path.addLine(to: CGPoint(x: -13, y: 44))
                 path.close()
                 return path.cgPath
             }())
@@ -207,52 +279,162 @@ class FighterNode: SKNode {
             hair.strokeColor = character.hairColor.darker()
             addChild(hair)
             
+            // Side-swept bangs (straight hair falling to one side)
+            let bangs = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: -14, y: 50))
+                path.addLine(to: CGPoint(x: -16, y: 44))
+                path.addLine(to: CGPoint(x: -8, y: 46))
+                path.addLine(to: CGPoint(x: 2, y: 48))
+                path.addQuadCurve(to: CGPoint(x: -14, y: 50), controlPoint: CGPoint(x: -6, y: 52))
+                path.close()
+                return path.cgPath
+            }())
+            bangs.fillColor = character.hairHighlightColor
+            bangs.strokeColor = .clear
+            addChild(bangs)
+            
+            // Hair side wisps (straight, not curly)
+            let leftWisp = SKShapeNode(rect: CGRect(x: -16, y: 40, width: 4, height: 10), cornerRadius: 2)
+            leftWisp.fillColor = character.hairColor
+            leftWisp.strokeColor = .clear
+            addChild(leftWisp)
+            
+            let rightWisp = SKShapeNode(rect: CGRect(x: 12, y: 42, width: 4, height: 8), cornerRadius: 2)
+            rightWisp.fillColor = character.hairColor
+            rightWisp.strokeColor = .clear
+            addChild(rightWisp)
+            
         case .ben:
-            // White hat/cap
-            let hat = SKShapeNode(path: {
+            // Brown mullet hair flowing out from under hat
+            let mulletLeft = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: -16, y: 46))
+                path.addLine(to: CGPoint(x: -18, y: 30))
+                path.addQuadCurve(to: CGPoint(x: -12, y: 28), controlPoint: CGPoint(x: -17, y: 26))
+                path.addLine(to: CGPoint(x: -12, y: 46))
+                path.close()
+                return path.cgPath
+            }())
+            mulletLeft.fillColor = character.hairColor
+            mulletLeft.strokeColor = character.hairColor.darker()
+            addChild(mulletLeft)
+            
+            let mulletRight = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: 16, y: 46))
+                path.addLine(to: CGPoint(x: 18, y: 30))
+                path.addQuadCurve(to: CGPoint(x: 12, y: 28), controlPoint: CGPoint(x: 17, y: 26))
+                path.addLine(to: CGPoint(x: 12, y: 46))
+                path.close()
+                return path.cgPath
+            }())
+            mulletRight.fillColor = character.hairColor
+            mulletRight.strokeColor = character.hairColor.darker()
+            addChild(mulletRight)
+            
+            // Mullet back (longer hair hanging down the back)
+            let mulletBack = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: -14, y: 48))
+                path.addLine(to: CGPoint(x: -12, y: 22))
+                path.addQuadCurve(to: CGPoint(x: 12, y: 22), controlPoint: CGPoint(x: 0, y: 18))
+                path.addLine(to: CGPoint(x: 14, y: 48))
+                path.close()
+                return path.cgPath
+            }())
+            mulletBack.fillColor = character.hairColor
+            mulletBack.strokeColor = character.hairColor.darker()
+            mulletBack.zPosition = -1
+            addChild(mulletBack)
+            
+            // Trucker cap - front panel (brown/dark)
+            let hatFront = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: -10, y: 48))
+                path.addLine(to: CGPoint(x: -10, y: 55))
+                path.addQuadCurve(to: CGPoint(x: 10, y: 55), controlPoint: CGPoint(x: 0, y: 64))
+                path.addLine(to: CGPoint(x: 10, y: 48))
+                path.close()
+                return path.cgPath
+            }())
+            hatFront.fillColor = UIColor(red: 0.3, green: 0.3, blue: 0.5, alpha: 1.0) // Dark blue front panel
+            hatFront.strokeColor = UIColor(red: 0.2, green: 0.2, blue: 0.4, alpha: 1.0)
+            hatFront.lineWidth = 1.5
+            addChild(hatFront)
+            
+            // Trucker cap - mesh back (white/light)
+            let hatBack = SKShapeNode(path: {
                 let path = UIBezierPath()
                 path.move(to: CGPoint(x: -18, y: 48))
                 path.addLine(to: CGPoint(x: -18, y: 54))
-                path.addQuadCurve(to: CGPoint(x: 18, y: 54), controlPoint: CGPoint(x: 0, y: 64))
+                path.addQuadCurve(to: CGPoint(x: -10, y: 55), controlPoint: CGPoint(x: -14, y: 60))
+                path.addLine(to: CGPoint(x: -10, y: 48))
+                path.close()
+                return path.cgPath
+            }())
+            hatBack.fillColor = UIColor(red: 0.92, green: 0.92, blue: 0.92, alpha: 1.0) // White mesh
+            hatBack.strokeColor = UIColor.lightGray
+            hatBack.lineWidth = 1
+            addChild(hatBack)
+            
+            let hatBackR = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: 10, y: 48))
+                path.addLine(to: CGPoint(x: 10, y: 55))
+                path.addQuadCurve(to: CGPoint(x: 18, y: 54), controlPoint: CGPoint(x: 14, y: 60))
                 path.addLine(to: CGPoint(x: 18, y: 48))
                 path.close()
                 return path.cgPath
             }())
-            hat.fillColor = .white
-            hat.strokeColor = UIColor.lightGray
-            hat.lineWidth = 1.5
-            addChild(hat)
+            hatBackR.fillColor = UIColor(red: 0.92, green: 0.92, blue: 0.92, alpha: 1.0)
+            hatBackR.strokeColor = UIColor.lightGray
+            hatBackR.lineWidth = 1
+            addChild(hatBackR)
             
             // Hat brim
             let brim = SKShapeNode(rect: CGRect(x: -20, y: 46, width: 40, height: 4), cornerRadius: 2)
-            brim.fillColor = .white
-            brim.strokeColor = UIColor.lightGray
+            brim.fillColor = UIColor(red: 0.3, green: 0.3, blue: 0.5, alpha: 1.0)
+            brim.strokeColor = UIColor(red: 0.2, green: 0.2, blue: 0.4, alpha: 1.0)
             addChild(brim)
             
         case .chuck:
-            // Blonde curly hair
+            // Very voluminous blonde curly hair - big wild curls
             let curlyHair = SKNode()
-            let positions: [(CGFloat, CGFloat)] = [
-                (-12, 52), (-6, 56), (0, 58), (6, 56), (12, 52),
-                (-14, 46), (-10, 48), (10, 48), (14, 46),
-                (-8, 58), (8, 58)
+            // Outer layer - big voluminous curls
+            let outerPositions: [(CGFloat, CGFloat, CGFloat)] = [
+                (-16, 50, 7), (-10, 56, 7), (-3, 60, 7), (3, 60, 7), (10, 56, 7), (16, 50, 7),
+                (-18, 44, 6), (-14, 42, 5), (14, 42, 5), (18, 44, 6),
+                (-6, 62, 6), (6, 62, 6), (0, 63, 6),
             ]
-            for pos in positions {
-                let curl = SKShapeNode(circleOfRadius: 5)
+            for pos in outerPositions {
+                let curl = SKShapeNode(circleOfRadius: pos.2)
                 curl.position = CGPoint(x: pos.0, y: pos.1)
                 curl.fillColor = character.hairColor
                 curl.strokeColor = character.hairColor.darker()
-                curl.lineWidth = 0.5
+                curl.lineWidth = 0.8
+                curlyHair.addChild(curl)
+            }
+            // Inner highlights - lighter curls for depth
+            let highlightPositions: [(CGFloat, CGFloat)] = [
+                (-8, 58), (4, 59), (12, 54), (-14, 48), (0, 61)
+            ]
+            for pos in highlightPositions {
+                let curl = SKShapeNode(circleOfRadius: 4)
+                curl.position = CGPoint(x: pos.0, y: pos.1)
+                curl.fillColor = character.hairHighlightColor
+                curl.strokeColor = .clear
                 curlyHair.addChild(curl)
             }
             addChild(curlyHair)
             
         case .stella:
-            // Long hair with a bow
+            // Long wavy brown/auburn hair with highlights - NO bow
+            // Top of head hair
             let hair = SKShapeNode(path: {
                 let path = UIBezierPath()
                 path.move(to: CGPoint(x: -16, y: 50))
-                path.addQuadCurve(to: CGPoint(x: 16, y: 50), controlPoint: CGPoint(x: 0, y: 62))
+                path.addQuadCurve(to: CGPoint(x: 16, y: 50), controlPoint: CGPoint(x: 0, y: 63))
                 path.addLine(to: CGPoint(x: 14, y: 44))
                 path.addLine(to: CGPoint(x: -14, y: 44))
                 path.close()
@@ -262,86 +444,164 @@ class FighterNode: SKNode {
             hair.strokeColor = character.hairColor.darker()
             addChild(hair)
             
-            // Side hair (long, flowing down)
-            let leftHairSide = SKShapeNode(rect: CGRect(x: -18, y: 25, width: 6, height: 30), cornerRadius: 3)
+            // Left side wavy long hair
+            let leftHairSide = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: -16, y: 52))
+                path.addQuadCurve(to: CGPoint(x: -19, y: 38), controlPoint: CGPoint(x: -20, y: 45))
+                path.addQuadCurve(to: CGPoint(x: -17, y: 24), controlPoint: CGPoint(x: -16, y: 31))
+                path.addQuadCurve(to: CGPoint(x: -20, y: 12), controlPoint: CGPoint(x: -21, y: 18))
+                path.addLine(to: CGPoint(x: -12, y: 14))
+                path.addQuadCurve(to: CGPoint(x: -13, y: 28), controlPoint: CGPoint(x: -11, y: 21))
+                path.addQuadCurve(to: CGPoint(x: -12, y: 42), controlPoint: CGPoint(x: -14, y: 35))
+                path.addLine(to: CGPoint(x: -14, y: 52))
+                path.close()
+                return path.cgPath
+            }())
             leftHairSide.fillColor = character.hairColor
             leftHairSide.strokeColor = character.hairColor.darker()
             addChild(leftHairSide)
             
-            let rightHairSide = SKShapeNode(rect: CGRect(x: 12, y: 25, width: 6, height: 30), cornerRadius: 3)
+            // Right side wavy long hair
+            let rightHairSide = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: 16, y: 52))
+                path.addQuadCurve(to: CGPoint(x: 19, y: 38), controlPoint: CGPoint(x: 20, y: 45))
+                path.addQuadCurve(to: CGPoint(x: 17, y: 24), controlPoint: CGPoint(x: 16, y: 31))
+                path.addQuadCurve(to: CGPoint(x: 20, y: 12), controlPoint: CGPoint(x: 21, y: 18))
+                path.addLine(to: CGPoint(x: 12, y: 14))
+                path.addQuadCurve(to: CGPoint(x: 13, y: 28), controlPoint: CGPoint(x: 11, y: 21))
+                path.addQuadCurve(to: CGPoint(x: 12, y: 42), controlPoint: CGPoint(x: 14, y: 35))
+                path.addLine(to: CGPoint(x: 14, y: 52))
+                path.close()
+                return path.cgPath
+            }())
             rightHairSide.fillColor = character.hairColor
             rightHairSide.strokeColor = character.hairColor.darker()
             addChild(rightHairSide)
             
-            // Bow
-            let bow = SKShapeNode(path: {
+            // Auburn/caramel highlight streaks
+            let leftHighlight = SKShapeNode(path: {
                 let path = UIBezierPath()
-                path.move(to: CGPoint(x: -6, y: 56))
-                path.addQuadCurve(to: CGPoint(x: 0, y: 56), controlPoint: CGPoint(x: -3, y: 62))
-                path.addQuadCurve(to: CGPoint(x: 6, y: 56), controlPoint: CGPoint(x: 3, y: 62))
-                path.addQuadCurve(to: CGPoint(x: 0, y: 56), controlPoint: CGPoint(x: 3, y: 50))
-                path.addQuadCurve(to: CGPoint(x: -6, y: 56), controlPoint: CGPoint(x: -3, y: 50))
+                path.move(to: CGPoint(x: -15, y: 48))
+                path.addQuadCurve(to: CGPoint(x: -17, y: 28), controlPoint: CGPoint(x: -18, y: 38))
+                path.addLine(to: CGPoint(x: -14, y: 30))
+                path.addQuadCurve(to: CGPoint(x: -13, y: 46), controlPoint: CGPoint(x: -15, y: 38))
                 path.close()
                 return path.cgPath
             }())
-            bow.fillColor = .systemPink
-            bow.strokeColor = UIColor.systemPink.darker()
-            bow.lineWidth = 1
-            addChild(bow)
+            leftHighlight.fillColor = character.hairHighlightColor
+            leftHighlight.strokeColor = .clear
+            addChild(leftHighlight)
+            
+            let rightHighlight = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: 15, y: 48))
+                path.addQuadCurve(to: CGPoint(x: 17, y: 28), controlPoint: CGPoint(x: 18, y: 38))
+                path.addLine(to: CGPoint(x: 14, y: 30))
+                path.addQuadCurve(to: CGPoint(x: 13, y: 46), controlPoint: CGPoint(x: 15, y: 38))
+                path.close()
+                return path.cgPath
+            }())
+            rightHighlight.fillColor = character.hairHighlightColor
+            rightHighlight.strokeColor = .clear
+            addChild(rightHighlight)
         }
     }
     
     private func buildCharacterFeatures() {
         switch character {
         case .theo:
-            // Glasses
-            let leftLens = SKShapeNode(circleOfRadius: 7)
-            leftLens.position = CGPoint(x: -6, y: 44)
-            leftLens.fillColor = .clear
-            leftLens.strokeColor = .darkGray
+            // Blue/purple rectangular glasses frames (matching his real frames)
+            let glassesColor = UIColor(red: 0.3, green: 0.2, blue: 0.7, alpha: 1.0) // Blue-purple
+            
+            let leftLens = SKShapeNode(rect: CGRect(x: -12, y: 41, width: 11, height: 8), cornerRadius: 2)
+            leftLens.fillColor = UIColor(red: 0.85, green: 0.9, blue: 1.0, alpha: 0.15) // Slight lens tint
+            leftLens.strokeColor = glassesColor
             leftLens.lineWidth = 2
             addChild(leftLens)
             
-            let rightLens = SKShapeNode(circleOfRadius: 7)
-            rightLens.position = CGPoint(x: 6, y: 44)
-            rightLens.fillColor = .clear
-            rightLens.strokeColor = .darkGray
+            let rightLens = SKShapeNode(rect: CGRect(x: 1, y: 41, width: 11, height: 8), cornerRadius: 2)
+            rightLens.fillColor = UIColor(red: 0.85, green: 0.9, blue: 1.0, alpha: 0.15)
+            rightLens.strokeColor = glassesColor
             rightLens.lineWidth = 2
             addChild(rightLens)
             
-            // Bridge
-            let bridge = SKShapeNode(rect: CGRect(x: -1, y: 43, width: 2, height: 2))
-            bridge.fillColor = .darkGray
+            // Bridge between lenses
+            let bridge = SKShapeNode(rect: CGRect(x: -1, y: 44, width: 2, height: 2))
+            bridge.fillColor = glassesColor
             bridge.strokeColor = .clear
             addChild(bridge)
             
+            // Temple arms (sides of glasses)
+            let leftArm = SKShapeNode(rect: CGRect(x: -14, y: 44, width: 3, height: 2))
+            leftArm.fillColor = glassesColor
+            leftArm.strokeColor = .clear
+            addChild(leftArm)
+            
+            let rightArm = SKShapeNode(rect: CGRect(x: 12, y: 44, width: 3, height: 2))
+            rightArm.fillColor = glassesColor
+            rightArm.strokeColor = .clear
+            addChild(rightArm)
+            
         case .ben:
-            break  // White hat is done in buildHair()
+            // Ben's colorful shirt detail - small stripe on the shirt to suggest Hawaiian pattern
+            let stripe1 = SKShapeNode(rect: CGRect(x: -8, y: 8, width: 4, height: 18), cornerRadius: 1)
+            stripe1.fillColor = UIColor(red: 0.2, green: 0.5, blue: 0.8, alpha: 0.6) // Blue stripe
+            stripe1.strokeColor = .clear
+            addChild(stripe1)
+            
+            let stripe2 = SKShapeNode(rect: CGRect(x: 2, y: 8, width: 4, height: 18), cornerRadius: 1)
+            stripe2.fillColor = UIColor(red: 0.95, green: 0.8, blue: 0.2, alpha: 0.6) // Yellow stripe
+            stripe2.strokeColor = .clear
+            addChild(stripe2)
             
         case .chuck:
-            // Freckles
-            let frecklePositions: [(CGFloat, CGFloat)] = [(-8, 40), (-4, 39), (4, 39), (8, 40)]
-            for pos in frecklePositions {
-                let freckle = SKShapeNode(circleOfRadius: 1)
-                freckle.position = CGPoint(x: pos.0, y: pos.1)
-                freckle.fillColor = UIColor(red: 0.7, green: 0.5, blue: 0.3, alpha: 0.6)
-                freckle.strokeColor = .clear
-                addChild(freckle)
-            }
+            // Chuck has a green hoodie - add hood detail on the back of neck/shoulders
+            let hoodBack = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: -14, y: 25))
+                path.addQuadCurve(to: CGPoint(x: 14, y: 25), controlPoint: CGPoint(x: 0, y: 32))
+                path.addLine(to: CGPoint(x: 12, y: 22))
+                path.addLine(to: CGPoint(x: -12, y: 22))
+                path.close()
+                return path.cgPath
+            }())
+            hoodBack.fillColor = character.shirtColor.darker(by: 0.05)
+            hoodBack.strokeColor = character.shirtColor.darker()
+            hoodBack.zPosition = -1
+            addChild(hoodBack)
+            
+            // Hoodie strings
+            let stringL = SKShapeNode(rect: CGRect(x: -4, y: 14, width: 1, height: 8))
+            stringL.fillColor = .white
+            stringL.strokeColor = .clear
+            addChild(stringL)
+            
+            let stringR = SKShapeNode(rect: CGRect(x: 3, y: 14, width: 1, height: 8))
+            stringR.fillColor = .white
+            stringR.strokeColor = .clear
+            addChild(stringR)
             
         case .stella:
-            // Rosy cheeks
-            let leftCheek = SKShapeNode(ellipseOf: CGSize(width: 8, height: 5))
-            leftCheek.position = CGPoint(x: -10, y: 40)
-            leftCheek.fillColor = UIColor(red: 1, green: 0.6, blue: 0.7, alpha: 0.5)
-            leftCheek.strokeColor = .clear
-            addChild(leftCheek)
+            // Necklace - delicate chain with small pendant
+            let chain = SKShapeNode(path: {
+                let path = UIBezierPath()
+                path.addArc(withCenter: CGPoint(x: 0, y: 26), radius: 10, startAngle: CGFloat.pi * 0.15, endAngle: CGFloat.pi * 0.85, clockwise: true)
+                return path.cgPath
+            }())
+            chain.fillColor = .clear
+            chain.strokeColor = UIColor(red: 0.85, green: 0.75, blue: 0.5, alpha: 0.9) // Gold chain
+            chain.lineWidth = 1
+            addChild(chain)
             
-            let rightCheek = SKShapeNode(ellipseOf: CGSize(width: 8, height: 5))
-            rightCheek.position = CGPoint(x: 10, y: 40)
-            rightCheek.fillColor = UIColor(red: 1, green: 0.6, blue: 0.7, alpha: 0.5)
-            rightCheek.strokeColor = .clear
-            addChild(rightCheek)
+            // Small pendant
+            let pendant = SKShapeNode(circleOfRadius: 2)
+            pendant.position = CGPoint(x: 0, y: 17)
+            pendant.fillColor = UIColor(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0) // Gold pendant
+            pendant.strokeColor = UIColor(red: 0.75, green: 0.65, blue: 0.35, alpha: 1.0)
+            pendant.lineWidth = 0.5
+            addChild(pendant)
         }
     }
     
