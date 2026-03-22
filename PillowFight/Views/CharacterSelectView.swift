@@ -19,10 +19,10 @@ struct CharacterSelectView: View {
             )
             .ignoresSafeArea()
             
-            VStack(spacing: 20) {
+            VStack(spacing: 18) {
                 // Header
                 Text(selectingOpponent ? "CHOOSE YOUR OPPONENT" : "CHOOSE YOUR FIGHTER")
-                    .font(.system(size: 24, weight: .black, design: .rounded))
+                    .font(.system(size: 22, weight: .black, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
                             colors: selectingOpponent ? [.red, .orange] : [.yellow, .orange],
@@ -31,11 +31,11 @@ struct CharacterSelectView: View {
                         )
                     )
                     .shadow(color: .orange.opacity(0.5), radius: 5)
-                    .padding(.top, 40)
+                    .padding(.top, 35)
                 
-                // VS indicator when selecting opponent
+                // VS indicator
                 if selectingOpponent {
-                    HStack {
+                    HStack(spacing: 12) {
                         CharacterAvatar(character: gameManager.selectedPlayer, size: 40)
                         Text("VS")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
@@ -79,25 +79,26 @@ struct CharacterSelectView: View {
                 
                 // Selected character info
                 if let selected = selectedCharacter {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 6) {
                         Text(selected.displayName)
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                         
                         Text(selected.description)
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
                             .foregroundColor(.white.opacity(0.7))
                         
-                        HStack {
+                        HStack(spacing: 4) {
                             Text("Special:")
-                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundColor(.yellow)
                             Text("\(selected.specialMoveEmoji) \(selected.specialMoveName)")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
                                 .foregroundColor(.white)
                         }
                     }
-                    .padding()
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color.white.opacity(0.1))
@@ -160,7 +161,7 @@ struct CharacterSelectView: View {
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .foregroundColor(.white.opacity(0.6))
                 }
-                .padding(.bottom, 30)
+                .padding(.bottom, 25)
             }
         }
         .onAppear {
@@ -169,14 +170,15 @@ struct CharacterSelectView: View {
     }
 }
 
+// MARK: - Character Card with Mini Sprite Preview
+
 struct CharacterCard: View {
     let character: GameCharacter
     let isSelected: Bool
     let isDisabled: Bool
     
     var body: some View {
-        VStack(spacing: 10) {
-            // Character portrait
+        VStack(spacing: 8) {
             ZStack {
                 RoundedRectangle(cornerRadius: 15)
                     .fill(
@@ -186,37 +188,175 @@ struct CharacterCard: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(height: 140)
+                    .frame(height: 150)
                     .overlay(
                         RoundedRectangle(cornerRadius: 15)
                             .stroke(isSelected ? Color.yellow : Color.clear, lineWidth: 3)
                     )
                     .shadow(color: isSelected ? .yellow.opacity(0.3) : .clear, radius: 10)
                 
-                VStack(spacing: 5) {
-                    // Character emoji representation
-                    Text(characterEmoji)
-                        .font(.system(size: 50))
+                VStack(spacing: 6) {
+                    // Character mini-portrait using colored shapes
+                    CharacterMiniSprite(character: character)
+                        .frame(width: 60, height: 80)
                     
                     Text(character.displayName)
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                     
                     Text(character.specialMoveEmoji)
-                        .font(.system(size: 16))
+                        .font(.system(size: 14))
                 }
             }
         }
         .opacity(isDisabled ? 0.4 : 1.0)
         .scaleEffect(isSelected ? 1.05 : 1.0)
     }
+}
+
+// MARK: - Mini Character Sprite (SwiftUI)
+
+struct CharacterMiniSprite: View {
+    let character: GameCharacter
     
-    private var characterEmoji: String {
-        switch character {
-        case .theo: return "🤓"
-        case .ben: return "🧢"
-        case .chuck: return "👦"
-        case .stella: return "👧"
+    var body: some View {
+        ZStack {
+            // Body
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color(character.shirtColor))
+                .frame(width: 22, height: 22)
+                .offset(y: 8)
+            
+            // Head (big chibi head)
+            Circle()
+                .fill(Color(character.skinColor))
+                .frame(width: 36, height: 36)
+                .overlay(
+                    Circle()
+                        .stroke(Color(character.skinColor.darker(by: 0.1)), lineWidth: 1.5)
+                )
+                .offset(y: -12)
+            
+            // Eyes
+            HStack(spacing: 6) {
+                Ellipse()
+                    .fill(.white)
+                    .frame(width: 8, height: 10)
+                    .overlay(
+                        Circle()
+                            .fill(.black)
+                            .frame(width: 5, height: 5)
+                            .offset(x: 0.5)
+                    )
+                Ellipse()
+                    .fill(.white)
+                    .frame(width: 8, height: 10)
+                    .overlay(
+                        Circle()
+                            .fill(.black)
+                            .frame(width: 5, height: 5)
+                            .offset(x: 0.5)
+                    )
+            }
+            .offset(y: -11)
+            
+            // Character-specific features
+            characterFeature
+            
+            // Shoes
+            HStack(spacing: 2) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color(character.shoeColor))
+                    .frame(width: 10, height: 5)
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color(character.shoeColor))
+                    .frame(width: 10, height: 5)
+            }
+            .offset(y: 28)
         }
+    }
+    
+    @ViewBuilder
+    private var characterFeature: some View {
+        switch character {
+        case .theo:
+            // Glasses
+            HStack(spacing: 2) {
+                RoundedRectangle(cornerRadius: 1.5)
+                    .stroke(Color(red: 0.3, green: 0.2, blue: 0.7), lineWidth: 1.5)
+                    .frame(width: 10, height: 7)
+                RoundedRectangle(cornerRadius: 1.5)
+                    .stroke(Color(red: 0.3, green: 0.2, blue: 0.7), lineWidth: 1.5)
+                    .frame(width: 10, height: 7)
+            }
+            .offset(y: -11)
+            
+            // Blonde hair
+            hairShape
+                .fill(Color(character.hairColor))
+                .frame(width: 34, height: 14)
+                .offset(y: -25)
+            
+        case .ben:
+            // Trucker cap
+            RoundedRectangle(cornerRadius: 3)
+                .fill(Color(red: 0.25, green: 0.25, blue: 0.5))
+                .frame(width: 36, height: 12)
+                .offset(y: -24)
+            
+            // Brim
+            RoundedRectangle(cornerRadius: 1)
+                .fill(Color(red: 0.25, green: 0.25, blue: 0.5))
+                .frame(width: 38, height: 4)
+                .offset(y: -19)
+            
+            // Mullet
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color(character.hairColor))
+                .frame(width: 30, height: 16)
+                .offset(y: -4)
+                .zIndex(-1)
+            
+        case .chuck:
+            // Big curly hair
+            ForEach(0..<7, id: \.self) { i in
+                let angle = Double(i) * (360.0 / 7.0) - 90
+                let rad = angle * .pi / 180
+                Circle()
+                    .fill(Color(character.hairColor))
+                    .frame(width: 12, height: 12)
+                    .offset(
+                        x: cos(rad) * 15,
+                        y: sin(rad) * 12 - 14
+                    )
+            }
+            
+        case .stella:
+            // Long wavy hair
+            hairShape
+                .fill(Color(character.hairColor))
+                .frame(width: 38, height: 14)
+                .offset(y: -25)
+            
+            // Long side strands
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color(character.hairColor))
+                .frame(width: 5, height: 30)
+                .offset(x: -16, y: 0)
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color(character.hairColor))
+                .frame(width: 5, height: 30)
+                .offset(x: 16, y: 0)
+            
+            // Necklace
+            Circle()
+                .fill(Color(red: 0.9, green: 0.8, blue: 0.5))
+                .frame(width: 4, height: 4)
+                .offset(y: 2)
+        }
+    }
+    
+    private var hairShape: some Shape {
+        RoundedRectangle(cornerRadius: 6)
     }
 }

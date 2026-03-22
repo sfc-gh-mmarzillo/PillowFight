@@ -13,13 +13,22 @@ struct VictoryView: View {
         GameCharacter.allCases.first { $0.displayName == winnerName } ?? .theo
     }
     
+    private var winnerQuote: String {
+        switch winnerCharacter {
+        case .theo: return "Brains AND brawn!"
+        case .ben: return "The mullet is mightier!"
+        case .chuck: return "Curls for the win!"
+        case .stella: return "Dazzling victory!"
+        }
+    }
+    
     var body: some View {
         ZStack {
             // Background
             LinearGradient(
                 colors: [
-                    Color(red: 0.1, green: 0.05, blue: 0.2),
-                    Color(red: 0.15, green: 0.1, blue: 0.3)
+                    Color(red: 0.08, green: 0.04, blue: 0.18),
+                    Color(red: 0.12, green: 0.08, blue: 0.28)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -35,12 +44,12 @@ struct VictoryView: View {
                     .position(piece.position)
             }
             
-            VStack(spacing: 25) {
+            VStack(spacing: 22) {
                 Spacer()
                 
                 if showTitle {
                     Text("VICTORY!")
-                        .font(.system(size: 48, weight: .black, design: .rounded))
+                        .font(.system(size: 50, weight: .black, design: .rounded))
                         .foregroundStyle(
                             LinearGradient(
                                 colors: [.yellow, .orange, .yellow],
@@ -48,36 +57,42 @@ struct VictoryView: View {
                                 endPoint: .trailing
                             )
                         )
-                        .shadow(color: .orange, radius: 15)
+                        .shadow(color: .orange, radius: 18)
                         .transition(.scale)
                 }
                 
                 if showCharacter {
-                    VStack(spacing: 15) {
+                    VStack(spacing: 14) {
                         // Winner portrait
                         CharacterAvatar(character: winnerCharacter, size: 100)
-                            .shadow(color: winnerCharacter.accentColor.opacity(0.5), radius: 20)
+                            .shadow(color: Color(winnerCharacter.shirtColor).opacity(0.6), radius: 25)
                         
                         Text("\(winnerName) WINS!")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .font(.system(size: 26, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                         
+                        Text(winnerQuote)
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundColor(.white.opacity(0.6))
+                            .italic()
+                        
                         // Round results
-                        HStack(spacing: 20) {
+                        HStack(spacing: 18) {
                             ForEach(gameManager.matchState.roundResults, id: \.roundNumber) { result in
                                 VStack(spacing: 4) {
                                     Text("R\(result.roundNumber)")
-                                        .font(.system(size: 12, weight: .medium, design: .rounded))
-                                        .foregroundColor(.white.opacity(0.5))
+                                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                                        .foregroundColor(.white.opacity(0.4))
                                     
                                     CharacterAvatar(character: result.winner, size: 30)
                                 }
                             }
                         }
-                        .padding()
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16)
                         .background(
                             RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.white.opacity(0.1))
+                                .fill(Color.white.opacity(0.08))
                         )
                     }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -96,7 +111,7 @@ struct VictoryView: View {
                             Text("REMATCH")
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .foregroundColor(.black)
-                                .padding(.horizontal, 40)
+                                .padding(.horizontal, 45)
                                 .padding(.vertical, 12)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
@@ -108,6 +123,7 @@ struct VictoryView: View {
                                             )
                                         )
                                 )
+                                .shadow(color: .orange.opacity(0.4), radius: 10)
                         }
                         
                         Button {
@@ -117,13 +133,13 @@ struct VictoryView: View {
                             }
                         } label: {
                             Text("New Characters")
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .font(.system(size: 15, weight: .medium, design: .rounded))
                                 .foregroundColor(.white.opacity(0.8))
-                                .padding(.horizontal, 30)
+                                .padding(.horizontal, 28)
                                 .padding(.vertical, 10)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color.white.opacity(0.15))
+                                        .fill(Color.white.opacity(0.12))
                                 )
                         }
                         
@@ -134,15 +150,15 @@ struct VictoryView: View {
                             }
                         } label: {
                             Text("Main Menu")
-                                .font(.system(size: 14, weight: .medium, design: .rounded))
-                                .foregroundColor(.white.opacity(0.5))
+                                .font(.system(size: 13, weight: .medium, design: .rounded))
+                                .foregroundColor(.white.opacity(0.4))
                         }
                     }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 
                 Spacer()
-                    .frame(height: 40)
+                    .frame(height: 35)
             }
         }
         .onAppear {
@@ -168,7 +184,7 @@ struct VictoryView: View {
         let screenWidth = UIScreen.main.bounds.width
         let colors: [Color] = [.red, .yellow, .blue, .green, .orange, .purple, .pink, .cyan]
         
-        for i in 0..<60 {
+        for i in 0..<70 {
             var piece = ConfettiPiece(
                 position: CGPoint(x: CGFloat.random(in: 0...screenWidth), y: -20),
                 rotation: Double.random(in: 0...360),
@@ -179,7 +195,7 @@ struct VictoryView: View {
             
             withAnimation(
                 .easeIn(duration: Double.random(in: 2...4))
-                .delay(Double(i) * 0.03)
+                .delay(Double(i) * 0.025)
             ) {
                 if let index = confettiPieces.firstIndex(where: { $0.id == piece.id }) {
                     confettiPieces[index].position.y = UIScreen.main.bounds.height + 50

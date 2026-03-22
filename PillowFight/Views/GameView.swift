@@ -12,31 +12,37 @@ struct GameView: View {
             Color.black.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Score display
+                // Round win indicators
                 HStack {
-                    // P1 wins
                     HStack(spacing: 4) {
                         ForEach(0..<gameManager.matchState.roundsToWin, id: \.self) { i in
                             Circle()
                                 .fill(i < gameManager.matchState.player1Wins ? Color.yellow : Color.gray.opacity(0.3))
                                 .frame(width: 12, height: 12)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.yellow.opacity(0.3), lineWidth: 1)
+                                )
                         }
                     }
                     
                     Spacer()
                     
                     Text("ROUND \(gameManager.matchState.currentRound)")
-                        .font(.system(size: 12, weight: .bold, design: .rounded))
-                        .foregroundColor(.white.opacity(0.6))
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundColor(.white.opacity(0.5))
                     
                     Spacer()
                     
-                    // P2 wins
                     HStack(spacing: 4) {
                         ForEach(0..<gameManager.matchState.roundsToWin, id: \.self) { i in
                             Circle()
                                 .fill(i < gameManager.matchState.player2Wins ? Color.yellow : Color.gray.opacity(0.3))
                                 .frame(width: 12, height: 12)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.yellow.opacity(0.3), lineWidth: 1)
+                                )
                         }
                     }
                 }
@@ -56,7 +62,7 @@ struct GameView: View {
                 
                 // Controls
                 controlsView
-                    .padding(.bottom, 10)
+                    .padding(.bottom, 8)
             }
         }
     }
@@ -64,32 +70,34 @@ struct GameView: View {
     private var controlsView: some View {
         HStack(spacing: 0) {
             // Movement controls (left side)
-            HStack(spacing: 12) {
-                // Left button
-                ControlButton(label: "<", color: .blue) {
+            HStack(spacing: 10) {
+                ControlButton(label: "◀", color: .blue, fontSize: 18) {
                     scene?.playerMoveLeft()
                 } onRelease: {
                     scene?.playerStopMoving()
                 }
                 
-                // Jump button
-                ControlButton(label: "^", color: .cyan) {
+                ControlButton(label: "▲", color: .cyan, fontSize: 18) {
                     scene?.playerJump()
                 } onRelease: {}
                 
-                // Right button
-                ControlButton(label: ">", color: .blue) {
+                ControlButton(label: "▶", color: .blue, fontSize: 18) {
                     scene?.playerMoveRight()
                 } onRelease: {
                     scene?.playerStopMoving()
                 }
             }
-            .padding(.leading, 15)
+            .padding(.leading, 12)
             
             Spacer()
             
             // Attack controls (right side)
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
+                // Block
+                ControlButton(label: "🛡️", color: .gray, fontSize: 20) {
+                    scene?.playerBlock()
+                } onRelease: {}
+                
                 // Pillow swing
                 ControlButton(label: "🛏️", color: .white, fontSize: 20) {
                     scene?.playerPillowSwing()
@@ -110,10 +118,13 @@ struct GameView: View {
                     scene?.playerSpecial()
                 } onRelease: {}
             }
-            .padding(.trailing, 15)
+            .padding(.trailing, 12)
         }
         .padding(.vertical, 8)
-        .background(Color.black.opacity(0.8))
+        .background(
+            RoundedRectangle(cornerRadius: 0)
+                .fill(Color.black.opacity(0.85))
+        )
     }
     
     private func setupScene() {
@@ -153,20 +164,24 @@ struct ControlButton: View {
         Text(label)
             .font(.system(size: fontSize, weight: .bold, design: .rounded))
             .foregroundColor(isSpecial ? .black : .white)
-            .frame(width: isSpecial ? 55 : 48, height: 48)
+            .frame(width: isSpecial ? 56 : 50, height: 50)
             .background(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 14)
                     .fill(
                         isSpecial ?
                         AnyShapeStyle(LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom)) :
-                        AnyShapeStyle(color.opacity(isPressed ? 0.6 : 0.3))
+                        AnyShapeStyle(color.opacity(isPressed ? 0.55 : 0.25))
                     )
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(color.opacity(0.5), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(
+                        isSpecial ? Color.orange : color.opacity(0.4),
+                        lineWidth: isSpecial ? 2 : 1.5
+                    )
             )
-            .scaleEffect(isPressed ? 0.9 : 1.0)
+            .scaleEffect(isPressed ? 0.88 : 1.0)
+            .brightness(isPressed ? 0.1 : 0)
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -180,6 +195,6 @@ struct ControlButton: View {
                         onRelease()
                     }
             )
-            .animation(.easeInOut(duration: 0.1), value: isPressed)
+            .animation(.easeInOut(duration: 0.08), value: isPressed)
     }
 }

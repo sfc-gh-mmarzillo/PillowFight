@@ -38,42 +38,61 @@ enum GameCharacter: String, CaseIterable, Identifiable {
         }
     }
     
-    // Colors for character rendering
+    // MARK: - Colors
+    
     var skinColor: UIColor { UIColor(red: 1.0, green: 0.85, blue: 0.72, alpha: 1.0) }
     
     var shirtColor: UIColor {
         switch self {
-        case .theo: return UIColor(red: 0.0, green: 0.6, blue: 0.6, alpha: 1.0) // Teal/green shirt
-        case .ben: return UIColor(red: 0.9, green: 0.45, blue: 0.35, alpha: 1.0) // Coral/salmon (Cubs Hawaiian shirt base)
-        case .chuck: return UIColor(red: 0.18, green: 0.42, blue: 0.22, alpha: 1.0) // Dark forest green hoodie
-        case .stella: return UIColor(red: 0.75, green: 0.55, blue: 0.58, alpha: 1.0) // Dusty rose/mauve top
+        case .theo: return UIColor(red: 0.0, green: 0.6, blue: 0.6, alpha: 1.0)
+        case .ben: return UIColor(red: 0.9, green: 0.45, blue: 0.35, alpha: 1.0)
+        case .chuck: return UIColor(red: 0.18, green: 0.42, blue: 0.22, alpha: 1.0)
+        case .stella: return UIColor(red: 0.75, green: 0.55, blue: 0.58, alpha: 1.0)
         }
     }
     
     var hairColor: UIColor {
         switch self {
-        case .theo: return UIColor(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0) // Blonde/light straight hair
-        case .ben: return UIColor(red: 0.45, green: 0.3, blue: 0.15, alpha: 1.0) // Brown mullet hair
-        case .chuck: return UIColor(red: 0.95, green: 0.85, blue: 0.4, alpha: 1.0) // Blonde curly
-        case .stella: return UIColor(red: 0.5, green: 0.3, blue: 0.15, alpha: 1.0) // Medium brown/auburn
+        case .theo: return UIColor(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0)
+        case .ben: return UIColor(red: 0.45, green: 0.3, blue: 0.15, alpha: 1.0)
+        case .chuck: return UIColor(red: 0.95, green: 0.85, blue: 0.4, alpha: 1.0)
+        case .stella: return UIColor(red: 0.5, green: 0.3, blue: 0.15, alpha: 1.0)
         }
     }
     
     var hairHighlightColor: UIColor {
         switch self {
-        case .theo: return UIColor(red: 0.95, green: 0.88, blue: 0.6, alpha: 1.0) // Lighter blonde
-        case .ben: return UIColor(red: 0.55, green: 0.38, blue: 0.2, alpha: 1.0) // Lighter brown
-        case .chuck: return UIColor(red: 1.0, green: 0.92, blue: 0.55, alpha: 1.0) // Bright blonde highlight
-        case .stella: return UIColor(red: 0.65, green: 0.4, blue: 0.2, alpha: 1.0) // Auburn/caramel highlights
+        case .theo: return UIColor(red: 0.95, green: 0.88, blue: 0.6, alpha: 1.0)
+        case .ben: return UIColor(red: 0.55, green: 0.38, blue: 0.2, alpha: 1.0)
+        case .chuck: return UIColor(red: 1.0, green: 0.92, blue: 0.55, alpha: 1.0)
+        case .stella: return UIColor(red: 0.65, green: 0.4, blue: 0.2, alpha: 1.0)
         }
     }
     
     var pantsColor: UIColor {
         switch self {
         case .theo: return UIColor.darkGray
-        case .ben: return UIColor(red: 0.3, green: 0.3, blue: 0.5, alpha: 1.0) // Dark jeans
-        case .chuck: return UIColor(red: 0.22, green: 0.48, blue: 0.28, alpha: 1.0) // Matching green hoodie pants
-        case .stella: return UIColor(red: 0.35, green: 0.45, blue: 0.6, alpha: 1.0) // Denim blue jeans
+        case .ben: return UIColor(red: 0.3, green: 0.3, blue: 0.5, alpha: 1.0)
+        case .chuck: return UIColor(red: 0.22, green: 0.48, blue: 0.28, alpha: 1.0)
+        case .stella: return UIColor(red: 0.35, green: 0.45, blue: 0.6, alpha: 1.0)
+        }
+    }
+    
+    var pillowColor: UIColor {
+        switch self {
+        case .theo: return UIColor(red: 0.75, green: 0.88, blue: 1.0, alpha: 1.0)
+        case .ben: return UIColor(red: 1.0, green: 0.88, blue: 0.75, alpha: 1.0)
+        case .chuck: return UIColor(red: 0.75, green: 1.0, blue: 0.8, alpha: 1.0)
+        case .stella: return UIColor(red: 1.0, green: 0.82, blue: 0.92, alpha: 1.0)
+        }
+    }
+    
+    var shoeColor: UIColor {
+        switch self {
+        case .theo: return UIColor(red: 0.3, green: 0.3, blue: 0.4, alpha: 1.0)
+        case .ben: return UIColor(red: 0.4, green: 0.28, blue: 0.18, alpha: 1.0)
+        case .chuck: return UIColor(red: 0.2, green: 0.38, blue: 0.22, alpha: 1.0)
+        case .stella: return UIColor(red: 0.55, green: 0.3, blue: 0.5, alpha: 1.0)
         }
     }
     
@@ -86,7 +105,6 @@ enum GameCharacter: String, CaseIterable, Identifiable {
         }
     }
     
-    // Character portrait colors for SwiftUI views
     var portraitGradient: [Color] {
         switch self {
         case .theo: return [.teal, .cyan]
@@ -97,7 +115,8 @@ enum GameCharacter: String, CaseIterable, Identifiable {
     }
 }
 
-// Move types available to all characters
+// MARK: - Move Types
+
 enum MoveType {
     case pillowSwing
     case kick
@@ -112,10 +131,10 @@ enum MoveType {
     
     var damage: CGFloat {
         switch self {
-        case .pillowSwing: return 10
-        case .kick: return 8
-        case .jump: return 5  // Jump itself doesn't do much; used for aerial positioning
-        case .special: return 20  // 2x damage
+        case .pillowSwing: return 12
+        case .kick: return 9
+        case .jump: return 5
+        case .special: return 22
         case .block: return 0
         default: return 0
         }
@@ -123,10 +142,10 @@ enum MoveType {
     
     var executionTime: TimeInterval {
         switch self {
-        case .pillowSwing: return 0.4
-        case .kick: return 0.35
-        case .jump: return 0.6
-        case .special: return 1.2  // Takes more time
+        case .pillowSwing: return 0.35
+        case .kick: return 0.28
+        case .jump: return 0.5
+        case .special: return 1.0
         case .block: return 0.1
         default: return 0
         }
@@ -134,21 +153,21 @@ enum MoveType {
     
     var cooldown: TimeInterval {
         switch self {
-        case .pillowSwing: return 0.5
-        case .kick: return 0.4
-        case .jump: return 0.3
-        case .special: return 3.0  // Longer cooldown for special
-        case .block: return 0.2
+        case .pillowSwing: return 0.35
+        case .kick: return 0.28
+        case .jump: return 0.2
+        case .special: return 2.5
+        case .block: return 0.15
         default: return 0
         }
     }
     
     var range: CGFloat {
         switch self {
-        case .pillowSwing: return 70
-        case .kick: return 60
+        case .pillowSwing: return 75
+        case .kick: return 65
         case .jump: return 50
-        case .special: return 100  // Special has more range
+        case .special: return 110
         case .block: return 0
         default: return 0
         }
