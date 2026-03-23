@@ -205,30 +205,10 @@ struct CharacterAvatar: View {
                         .stroke(Color.white.opacity(0.2), lineWidth: 1.5)
                 )
             
-            Text(String(character.displayName.prefix(1)))
-                .font(.system(size: size * 0.4, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            
-            characterFeature
-                .offset(x: size * 0.3, y: -size * 0.3)
-        }
-    }
-    
-    @ViewBuilder
-    private var characterFeature: some View {
-        switch character {
-        case .theo:
-            Text("🤓")
-                .font(.system(size: size * 0.28))
-        case .ben:
-            Text("🧢")
-                .font(.system(size: size * 0.28))
-        case .chuck:
-            Text("🟡")
-                .font(.system(size: size * 0.24))
-        case .stella:
-            Text("💎")
-                .font(.system(size: size * 0.28))
+            Image(uiImage: FaceRenderer.uiImage(for: character))
+                .resizable()
+                .interpolation(.high)
+                .frame(width: size * 0.75, height: size * 0.75)
         }
     }
 }

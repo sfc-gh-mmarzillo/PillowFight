@@ -8,7 +8,7 @@ class FighterNode: SKNode {
     // Visual components
     private var torsoNode: SKShapeNode!
     private var pantsNode: SKShapeNode!
-    private var headNode: SKShapeNode!
+    private var faceSprite: SKSpriteNode!
     private var leftArmNode: SKShapeNode!
     private var rightArmNode: SKShapeNode!
     private var leftLegNode: SKShapeNode!
@@ -18,15 +18,6 @@ class FighterNode: SKNode {
     private var pillowNode: SKNode!
     private var pillowBody: SKShapeNode!
     private var nameLabel: SKLabelNode!
-    
-    // Face components (for expressions)
-    private var leftEyeWhite: SKShapeNode!
-    private var rightEyeWhite: SKShapeNode!
-    private var leftPupil: SKShapeNode!
-    private var rightPupil: SKShapeNode!
-    private var leftBrow: SKShapeNode!
-    private var rightBrow: SKShapeNode!
-    private var mouthNode: SKNode!
     
     // Expression system
     enum Expression { case normal, attacking, hurt, happy, dizzy }
@@ -66,10 +57,6 @@ class FighterNode: SKNode {
     
     // Layout constants
     private let headCenterY: CGFloat = 46
-    private let headRadius: CGFloat = 24
-    private let eyeY: CGFloat = 49
-    private let browY: CGFloat = 58
-    private let mouthY: CGFloat = 37
     
     // Hit detection
     var attackHitbox: CGRect {
@@ -100,9 +87,7 @@ class FighterNode: SKNode {
     
     private func buildCharacter() {
         buildBody()
-        buildHead()
-        buildFace()
-        buildNormalMouth()
+        buildFaceSprite()
         buildHair()
         buildClothingDetails()
         buildPillow()
@@ -218,54 +203,19 @@ class FighterNode: SKNode {
         addChild(rightHand)
     }
     
-    // MARK: - Head
+    // MARK: - Face (Core Graphics Texture)
     
-    private func buildHead() {
-        // Neck (thinner for Stella who's older, normal for others)
+    private func buildFaceSprite() {
+        // Neck
         let neckW: CGFloat = character == .stella ? 6 : 8
         let neck = SKShapeNode(rect: CGRect(x: -neckW / 2, y: 20, width: neckW, height: 5), cornerRadius: 2)
         neck.fillColor = character.skinColor
         neck.strokeColor = character.skinColor.darker(by: 0.1)
         neck.lineWidth = 1
-        neck.zPosition = 1
+        neck.zPosition = 0
         addChild(neck)
         
-        // Character-specific head shapes
-        switch character {
-        case .theo:
-            // Theo: rounder, slightly chubbier - he's the youngest
-            headNode = SKShapeNode(ellipseOf: CGSize(width: 50, height: 50))
-            headNode.position = CGPoint(x: 0, y: headCenterY)
-        case .ben:
-            // Ben: slightly wider jaw, more square-ish
-            headNode = SKShapeNode(path: {
-                let p = UIBezierPath()
-                p.move(to: CGPoint(x: -22, y: -4))
-                p.addQuadCurve(to: CGPoint(x: -24, y: 8), controlPoint: CGPoint(x: -25, y: 2))
-                p.addQuadCurve(to: CGPoint(x: 0, y: 24), controlPoint: CGPoint(x: -24, y: 24))
-                p.addQuadCurve(to: CGPoint(x: 24, y: 8), controlPoint: CGPoint(x: 24, y: 24))
-                p.addQuadCurve(to: CGPoint(x: 22, y: -4), controlPoint: CGPoint(x: 25, y: 2))
-                p.addQuadCurve(to: CGPoint(x: -22, y: -4), controlPoint: CGPoint(x: 0, y: -14))
-                p.close()
-                return p.cgPath
-            }())
-            headNode.position = CGPoint(x: 0, y: headCenterY)
-        case .chuck:
-            // Chuck: big round face to match his big personality and curls
-            headNode = SKShapeNode(ellipseOf: CGSize(width: 52, height: 48))
-            headNode.position = CGPoint(x: 0, y: headCenterY)
-        case .stella:
-            // Stella: more oval, slightly narrower - she's the oldest/teen
-            headNode = SKShapeNode(ellipseOf: CGSize(width: 44, height: 52))
-            headNode.position = CGPoint(x: 0, y: headCenterY)
-        }
-        headNode.fillColor = character.skinColor
-        headNode.strokeColor = character.skinColor.darker(by: 0.12)
-        headNode.lineWidth = 2
-        headNode.zPosition = 1
-        addChild(headNode)
-        
-        // Ears (small, peeking out from sides)
+        // Ears (behind face sprite)
         let earY: CGFloat = headCenterY - 2
         let earSize: CGFloat = character == .chuck ? 7 : 6
         for side: CGFloat in [-1, 1] {
@@ -275,9 +225,8 @@ class FighterNode: SKNode {
             ear.fillColor = character.skinColor
             ear.strokeColor = character.skinColor.darker(by: 0.12)
             ear.lineWidth = 1.2
-            ear.zPosition = 0  // Behind head
+            ear.zPosition = 0
             addChild(ear)
-            // Inner ear detail
             let innerEar = SKShapeNode(ellipseOf: CGSize(width: earSize - 3, height: earSize - 2))
             innerEar.position = CGPoint(x: earX, y: earY)
             innerEar.fillColor = character.skinColor.darker(by: 0.06)
@@ -286,553 +235,12 @@ class FighterNode: SKNode {
             addChild(innerEar)
         }
         
-        // Head specular highlight
-        let headHL = SKShapeNode(circleOfRadius: 6)
-        headHL.position = CGPoint(x: -8, y: headCenterY + 10)
-        headHL.fillColor = .white
-        headHL.strokeColor = .clear
-        headHL.alpha = 0.15
-        headHL.zPosition = 1
-        addChild(headHL)
-        
-        // Character-specific cheek blush
-        let cheekAlpha: CGFloat
-        let cheekW: CGFloat
-        let cheekH: CGFloat
-        switch character {
-        case .theo:
-            cheekAlpha = 0.25; cheekW = 9; cheekH = 6  // Rosy young kid cheeks
-        case .ben:
-            cheekAlpha = 0.15; cheekW = 7; cheekH = 5  // Subtle
-        case .chuck:
-            cheekAlpha = 0.35; cheekW = 10; cheekH = 7  // Very rosy, prominent cheeks
-        case .stella:
-            cheekAlpha = 0.12; cheekW = 6; cheekH = 4  // Subtle teen blush
-        }
-        
-        for side: CGFloat in [-1, 1] {
-            let cheek = SKShapeNode(ellipseOf: CGSize(width: cheekW, height: cheekH))
-            cheek.position = CGPoint(x: side * 15, y: 42)
-            cheek.fillColor = UIColor(red: 1.0, green: 0.6, blue: 0.6, alpha: 1.0)
-            cheek.strokeColor = .clear
-            cheek.alpha = cheekAlpha
-            cheek.zPosition = 2
-            addChild(cheek)
-        }
-    }
-    
-    // MARK: - Face
-    
-    private func buildFace() {
-        // Character-specific eye dimensions
-        let eyeW: CGFloat
-        let eyeH: CGFloat
-        let eyeSpacing: CGFloat
-        let pupilR: CGFloat
-        let pupilColor: UIColor
-        let eyeOutlineW: CGFloat
-        
-        switch character {
-        case .theo:
-            // Bigger, rounder eyes (magnified behind glasses) - younger kid look
-            eyeW = 14; eyeH = 16; eyeSpacing = 9; pupilR = 5
-            pupilColor = UIColor(red: 0.25, green: 0.4, blue: 0.15, alpha: 1.0) // Green-hazel eyes
-            eyeOutlineW = 1.5
-        case .ben:
-            // Slightly narrower, more mischievous eyes
-            eyeW = 11; eyeH = 12; eyeSpacing = 10; pupilR = 4
-            pupilColor = UIColor(red: 0.3, green: 0.2, blue: 0.1, alpha: 1.0) // Brown eyes
-            eyeOutlineW = 1.5
-        case .chuck:
-            // Wide open, enthusiastic round eyes
-            eyeW = 13; eyeH = 15; eyeSpacing = 9; pupilR = 4.5
-            pupilColor = UIColor(red: 0.2, green: 0.35, blue: 0.5, alpha: 1.0) // Blue eyes
-            eyeOutlineW = 1.5
-        case .stella:
-            // Slightly almond-shaped, more refined - teen look
-            eyeW = 12; eyeH = 13; eyeSpacing = 9; pupilR = 4
-            pupilColor = UIColor(red: 0.35, green: 0.22, blue: 0.12, alpha: 1.0) // Dark brown eyes
-            eyeOutlineW = 1.8  // Thicker outline simulates subtle liner
-        }
-        
-        // Left eye white
-        leftEyeWhite = SKShapeNode(ellipseOf: CGSize(width: eyeW, height: eyeH))
-        leftEyeWhite.position = CGPoint(x: -eyeSpacing, y: eyeY)
-        leftEyeWhite.fillColor = .white
-        leftEyeWhite.strokeColor = UIColor(white: 0.2, alpha: 1.0)
-        leftEyeWhite.lineWidth = eyeOutlineW
-        leftEyeWhite.zPosition = 3
-        addChild(leftEyeWhite)
-        
-        // Left iris (colored ring around pupil)
-        let leftIris = SKShapeNode(circleOfRadius: pupilR + 1)
-        leftIris.position = CGPoint(x: 1, y: -0.5)
-        leftIris.fillColor = pupilColor
-        leftIris.strokeColor = pupilColor.darker(by: 0.15)
-        leftIris.lineWidth = 0.8
-        leftIris.zPosition = 1
-        leftEyeWhite.addChild(leftIris)
-        
-        // Left pupil (dark center)
-        leftPupil = SKShapeNode(circleOfRadius: pupilR - 1)
-        leftPupil.position = .zero
-        leftPupil.fillColor = UIColor(red: 0.08, green: 0.05, blue: 0.02, alpha: 1.0)
-        leftPupil.strokeColor = .clear
-        leftPupil.zPosition = 1
-        leftIris.addChild(leftPupil)
-        
-        // Left pupil highlight (big)
-        let leftHL = SKShapeNode(circleOfRadius: 2)
-        leftHL.position = CGPoint(x: 1.5, y: 2)
-        leftHL.fillColor = .white
-        leftHL.strokeColor = .clear
-        leftPupil.addChild(leftHL)
-        
-        // Left pupil highlight (small, secondary)
-        let leftHL2 = SKShapeNode(circleOfRadius: 1)
-        leftHL2.position = CGPoint(x: -1.5, y: -1)
-        leftHL2.fillColor = .white
-        leftHL2.strokeColor = .clear
-        leftHL2.alpha = 0.6
-        leftPupil.addChild(leftHL2)
-        
-        // Right eye white
-        rightEyeWhite = SKShapeNode(ellipseOf: CGSize(width: eyeW, height: eyeH))
-        rightEyeWhite.position = CGPoint(x: eyeSpacing, y: eyeY)
-        rightEyeWhite.fillColor = .white
-        rightEyeWhite.strokeColor = UIColor(white: 0.2, alpha: 1.0)
-        rightEyeWhite.lineWidth = eyeOutlineW
-        rightEyeWhite.zPosition = 3
-        addChild(rightEyeWhite)
-        
-        // Right iris
-        let rightIris = SKShapeNode(circleOfRadius: pupilR + 1)
-        rightIris.position = CGPoint(x: 1, y: -0.5)
-        rightIris.fillColor = pupilColor
-        rightIris.strokeColor = pupilColor.darker(by: 0.15)
-        rightIris.lineWidth = 0.8
-        rightIris.zPosition = 1
-        rightEyeWhite.addChild(rightIris)
-        
-        // Right pupil
-        rightPupil = SKShapeNode(circleOfRadius: pupilR - 1)
-        rightPupil.position = .zero
-        rightPupil.fillColor = UIColor(red: 0.08, green: 0.05, blue: 0.02, alpha: 1.0)
-        rightPupil.strokeColor = .clear
-        rightPupil.zPosition = 1
-        rightIris.addChild(rightPupil)
-        
-        // Right pupil highlight (big)
-        let rightHL = SKShapeNode(circleOfRadius: 2)
-        rightHL.position = CGPoint(x: 1.5, y: 2)
-        rightHL.fillColor = .white
-        rightHL.strokeColor = .clear
-        rightPupil.addChild(rightHL)
-        
-        // Right pupil highlight (small)
-        let rightHL2 = SKShapeNode(circleOfRadius: 1)
-        rightHL2.position = CGPoint(x: -1.5, y: -1)
-        rightHL2.fillColor = .white
-        rightHL2.strokeColor = .clear
-        rightHL2.alpha = 0.6
-        rightPupil.addChild(rightHL2)
-        
-        // Character-specific eyebrows
-        let browColor = character.hairColor.darker(by: 0.15)
-        let browW: CGFloat
-        let browH: CGFloat
-        let browRot: CGFloat
-        
-        switch character {
-        case .theo:
-            browW = 8; browH = 2.0; browRot = 0.08  // Thin, neutral - young kid
-        case .ben:
-            browW = 10; browH = 2.8; browRot = -0.08  // Thicker, slightly cocky angle
-        case .chuck:
-            browW = 9; browH = 2.2; browRot = 0.15  // Raised, enthusiastic
-        case .stella:
-            browW = 10; browH = 1.8; browRot = 0.1  // Thin, arched - feminine
-        }
-        
-        leftBrow = SKShapeNode(rect: CGRect(x: -browW / 2, y: -browH / 2, width: browW, height: browH), cornerRadius: 1)
-        leftBrow.position = CGPoint(x: -eyeSpacing, y: browY)
-        leftBrow.fillColor = browColor
-        leftBrow.strokeColor = .clear
-        leftBrow.zPosition = 4
-        leftBrow.zRotation = browRot
-        addChild(leftBrow)
-        
-        rightBrow = SKShapeNode(rect: CGRect(x: -browW / 2, y: -browH / 2, width: browW, height: browH), cornerRadius: 1)
-        rightBrow.position = CGPoint(x: eyeSpacing, y: browY)
-        rightBrow.fillColor = browColor
-        rightBrow.strokeColor = .clear
-        rightBrow.zPosition = 4
-        rightBrow.zRotation = -browRot
-        addChild(rightBrow)
-        
-        // NOSE (character-specific)
-        buildNose()
-        
-        // Character-specific facial details
-        buildFaceDetails()
-    }
-    
-    // MARK: - Nose
-    
-    private func buildNose() {
-        let noseY: CGFloat = 43
-        
-        switch character {
-        case .theo:
-            // Small button nose - youngest kid
-            let nose = SKShapeNode(circleOfRadius: 2.5)
-            nose.position = CGPoint(x: 0, y: noseY)
-            nose.fillColor = character.skinColor.darker(by: 0.06)
-            nose.strokeColor = character.skinColor.darker(by: 0.12)
-            nose.lineWidth = 0.8
-            nose.zPosition = 3
-            addChild(nose)
-            
-        case .ben:
-            // Slightly wider, rounder nose
-            let nose = SKShapeNode(ellipseOf: CGSize(width: 7, height: 5))
-            nose.position = CGPoint(x: 0, y: noseY)
-            nose.fillColor = character.skinColor.darker(by: 0.05)
-            nose.strokeColor = character.skinColor.darker(by: 0.1)
-            nose.lineWidth = 0.8
-            nose.zPosition = 3
-            addChild(nose)
-            // Nostrils
-            for side: CGFloat in [-1, 1] {
-                let nostril = SKShapeNode(circleOfRadius: 1)
-                nostril.position = CGPoint(x: side * 2, y: noseY - 0.5)
-                nostril.fillColor = character.skinColor.darker(by: 0.15)
-                nostril.strokeColor = .clear
-                nostril.zPosition = 3
-                addChild(nostril)
-            }
-            
-        case .chuck:
-            // Small round upturned nose
-            let nose = SKShapeNode(circleOfRadius: 3)
-            nose.position = CGPoint(x: 0, y: noseY + 1)
-            nose.fillColor = character.skinColor.darker(by: 0.05)
-            nose.strokeColor = character.skinColor.darker(by: 0.1)
-            nose.lineWidth = 0.8
-            nose.zPosition = 3
-            addChild(nose)
-            // Nose highlight
-            let noseHL = SKShapeNode(circleOfRadius: 1.2)
-            noseHL.position = CGPoint(x: -0.5, y: noseY + 2)
-            noseHL.fillColor = .white
-            noseHL.strokeColor = .clear
-            noseHL.alpha = 0.2
-            noseHL.zPosition = 3
-            addChild(noseHL)
-            
-        case .stella:
-            // Delicate, defined nose with bridge line
-            let noseBridge = SKShapeNode(path: {
-                let p = UIBezierPath()
-                p.move(to: CGPoint(x: 0, y: noseY + 5))
-                p.addQuadCurve(to: CGPoint(x: 1.5, y: noseY - 1), controlPoint: CGPoint(x: 1, y: noseY + 2))
-                p.addQuadCurve(to: CGPoint(x: -1.5, y: noseY - 1), controlPoint: CGPoint(x: 0, y: noseY - 2.5))
-                p.addQuadCurve(to: CGPoint(x: 0, y: noseY + 5), controlPoint: CGPoint(x: -1, y: noseY + 2))
-                p.close()
-                return p.cgPath
-            }())
-            noseBridge.fillColor = character.skinColor.darker(by: 0.04)
-            noseBridge.strokeColor = character.skinColor.darker(by: 0.1)
-            noseBridge.lineWidth = 0.6
-            noseBridge.zPosition = 3
-            addChild(noseBridge)
-        }
-    }
-    
-    // MARK: - Face Details (freckles, eyelashes, dimples, etc.)
-    
-    private func buildFaceDetails() {
-        switch character {
-        case .theo:
-            // Theo is the youngest - no extra details needed, glasses define him
-            break
-            
-        case .ben:
-            // Freckles scattered across cheeks and nose
-            let freckleColor = character.skinColor.darker(by: 0.18)
-            let frecklePositions: [(CGFloat, CGFloat)] = [
-                (-12, 44), (-10, 42), (-8, 45), (-14, 43),
-                (8, 44), (10, 42), (12, 45), (14, 43),
-                (-3, 43), (3, 43), (-1, 44), (1, 42)
-            ]
-            for fp in frecklePositions {
-                let freckle = SKShapeNode(circleOfRadius: 0.8)
-                freckle.position = CGPoint(x: fp.0, y: fp.1)
-                freckle.fillColor = freckleColor
-                freckle.strokeColor = .clear
-                freckle.zPosition = 2
-                addChild(freckle)
-            }
-            
-        case .chuck:
-            // Dimples near mouth (visible when grinning)
-            for side: CGFloat in [-1, 1] {
-                let dimple = SKShapeNode(path: {
-                    let p = UIBezierPath()
-                    p.addArc(withCenter: .zero, radius: 2, startAngle: .pi * 0.2, endAngle: .pi * 0.8, clockwise: false)
-                    return p.cgPath
-                }())
-                dimple.position = CGPoint(x: side * 10, y: mouthY + 1)
-                dimple.fillColor = .clear
-                dimple.strokeColor = character.skinColor.darker(by: 0.12)
-                dimple.lineWidth = 0.8
-                dimple.zPosition = 2
-                addChild(dimple)
-            }
-            
-        case .stella:
-            // Eyelashes (small lines above eyes)
-            let lashColor = UIColor(red: 0.2, green: 0.12, blue: 0.08, alpha: 0.8)
-            // Left eye lashes
-            for i in 0..<3 {
-                let angle = CGFloat(i - 1) * 0.35 + .pi / 2
-                let lash = SKShapeNode(path: {
-                    let p = UIBezierPath()
-                    p.move(to: .zero)
-                    p.addLine(to: CGPoint(x: cos(angle) * 3.5, y: sin(angle) * 3.5))
-                    return p.cgPath
-                }())
-                lash.position = CGPoint(x: -9 + CGFloat(i - 1) * 4, y: eyeY + 6)
-                lash.strokeColor = lashColor
-                lash.lineWidth = 1.2
-                lash.zPosition = 4
-                addChild(lash)
-            }
-            // Right eye lashes
-            for i in 0..<3 {
-                let angle = CGFloat(i - 1) * 0.35 + .pi / 2
-                let lash = SKShapeNode(path: {
-                    let p = UIBezierPath()
-                    p.move(to: .zero)
-                    p.addLine(to: CGPoint(x: cos(angle) * 3.5, y: sin(angle) * 3.5))
-                    return p.cgPath
-                }())
-                lash.position = CGPoint(x: 9 + CGFloat(i - 1) * 4, y: eyeY + 6)
-                lash.strokeColor = lashColor
-                lash.lineWidth = 1.2
-                lash.zPosition = 4
-                addChild(lash)
-            }
-            
-            // Small beauty mark
-            let beautyMark = SKShapeNode(circleOfRadius: 0.8)
-            beautyMark.position = CGPoint(x: 12, y: 40)
-            beautyMark.fillColor = character.skinColor.darker(by: 0.25)
-            beautyMark.strokeColor = .clear
-            beautyMark.zPosition = 2
-            addChild(beautyMark)
-        }
-    }
-    
-    // MARK: - Character-Specific Mouths
-    
-    private func buildNormalMouth() {
-        mouthNode?.removeFromParent()
-        let mouth = SKNode()
-        mouth.zPosition = 3
-        
-        let mouthColor = UIColor(red: 0.8, green: 0.3, blue: 0.3, alpha: 1.0)
-        let mouthDark = UIColor(red: 0.4, green: 0.08, blue: 0.08, alpha: 1.0)
-        
-        switch character {
-        case .theo:
-            // Small, gentle closed-mouth smile - sweet young kid
-            let smile = SKShapeNode(path: {
-                let p = UIBezierPath()
-                p.addArc(withCenter: CGPoint(x: 0, y: mouthY + 2), radius: 5, startAngle: .pi * 0.15, endAngle: .pi * 0.85, clockwise: true)
-                return p.cgPath
-            }())
-            smile.strokeColor = mouthColor
-            smile.lineWidth = 1.8
-            smile.fillColor = .clear
-            mouth.addChild(smile)
-            
-            // Slight lip color
-            let lip = SKShapeNode(ellipseOf: CGSize(width: 8, height: 2.5))
-            lip.position = CGPoint(x: 0, y: mouthY)
-            lip.fillColor = mouthColor.withAlphaComponent(0.3)
-            lip.strokeColor = .clear
-            mouth.addChild(lip)
-            
-        case .ben:
-            // BIG open grin with clearly missing front teeth
-            let grinW: CGFloat = 14
-            let grinH: CGFloat = 8
-            let mouthBg = SKShapeNode(rect: CGRect(x: -grinW / 2, y: mouthY - 3, width: grinW, height: grinH), cornerRadius: 3)
-            mouthBg.fillColor = mouthDark
-            mouthBg.strokeColor = mouthColor
-            mouthBg.lineWidth = 1.2
-            mouth.addChild(mouthBg)
-            
-            // Upper gum line
-            let gumLine = SKShapeNode(rect: CGRect(x: -grinW / 2 + 1, y: mouthY + 2, width: grinW - 2, height: 2))
-            gumLine.fillColor = UIColor(red: 0.85, green: 0.6, blue: 0.6, alpha: 1.0)
-            gumLine.strokeColor = .clear
-            mouth.addChild(gumLine)
-            
-            // Teeth with prominent gap in front center
-            // Left teeth (2 visible)
-            let toothW: CGFloat = 3
-            let toothH: CGFloat = 4
-            let t1 = SKShapeNode(rect: CGRect(x: -6.5, y: mouthY + 0.5, width: toothW, height: toothH), cornerRadius: 0.5)
-            t1.fillColor = UIColor(red: 0.98, green: 0.97, blue: 0.92, alpha: 1.0)
-            t1.strokeColor = UIColor.lightGray
-            t1.lineWidth = 0.4
-            mouth.addChild(t1)
-            
-            let t2 = SKShapeNode(rect: CGRect(x: -3, y: mouthY + 0.5, width: toothW - 0.5, height: toothH - 0.5), cornerRadius: 0.5)
-            t2.fillColor = UIColor(red: 0.98, green: 0.97, blue: 0.92, alpha: 1.0)
-            t2.strokeColor = UIColor.lightGray
-            t2.lineWidth = 0.4
-            mouth.addChild(t2)
-            
-            // GAP - no teeth at center (missing front teeth)
-            
-            // Right teeth (2 visible)
-            let t3 = SKShapeNode(rect: CGRect(x: 1, y: mouthY + 0.5, width: toothW - 0.5, height: toothH - 0.5), cornerRadius: 0.5)
-            t3.fillColor = UIColor(red: 0.98, green: 0.97, blue: 0.92, alpha: 1.0)
-            t3.strokeColor = UIColor.lightGray
-            t3.lineWidth = 0.4
-            mouth.addChild(t3)
-            
-            let t4 = SKShapeNode(rect: CGRect(x: 3.5, y: mouthY + 0.5, width: toothW, height: toothH), cornerRadius: 0.5)
-            t4.fillColor = UIColor(red: 0.98, green: 0.97, blue: 0.92, alpha: 1.0)
-            t4.strokeColor = UIColor.lightGray
-            t4.lineWidth = 0.4
-            mouth.addChild(t4)
-            
-            // Tongue peeking through the gap
-            let tongue = SKShapeNode(ellipseOf: CGSize(width: 4, height: 3))
-            tongue.position = CGPoint(x: 0, y: mouthY - 0.5)
-            tongue.fillColor = UIColor(red: 0.9, green: 0.45, blue: 0.45, alpha: 0.7)
-            tongue.strokeColor = .clear
-            mouth.addChild(tongue)
-            
-        case .chuck:
-            // HUGE ear-to-ear grin with missing front teeth - his signature look
-            let grinW: CGFloat = 18
-            let grinH: CGFloat = 9
-            let mouthBg = SKShapeNode(path: {
-                let p = UIBezierPath()
-                p.move(to: CGPoint(x: -grinW / 2, y: mouthY + 2))
-                p.addQuadCurve(to: CGPoint(x: grinW / 2, y: mouthY + 2), controlPoint: CGPoint(x: 0, y: mouthY - grinH))
-                p.addLine(to: CGPoint(x: grinW / 2, y: mouthY + 2))
-                p.addLine(to: CGPoint(x: -grinW / 2, y: mouthY + 2))
-                p.close()
-                return p.cgPath
-            }())
-            mouthBg.fillColor = mouthDark
-            mouthBg.strokeColor = mouthColor
-            mouthBg.lineWidth = 1.2
-            mouth.addChild(mouthBg)
-            
-            // Upper gum
-            let gum = SKShapeNode(rect: CGRect(x: -grinW / 2 + 1, y: mouthY, width: grinW - 2, height: 2.5), cornerRadius: 1)
-            gum.fillColor = UIColor(red: 0.85, green: 0.6, blue: 0.6, alpha: 1.0)
-            gum.strokeColor = .clear
-            mouth.addChild(gum)
-            
-            // Teeth with big gap - two front teeth missing
-            let teethData: [(CGFloat, CGFloat)] = [
-                (-8, 3.5), (-5.5, 3), (-3, 2.5),
-                // GAP at -1 to 1 (missing front teeth)
-                (3, 2.5), (5.5, 3), (8, 3.5)
-            ]
-            for td in teethData {
-                let tooth = SKShapeNode(rect: CGRect(x: td.0 - 1.2, y: mouthY - 0.5, width: 2.5, height: td.1), cornerRadius: 0.5)
-                tooth.fillColor = UIColor(red: 0.98, green: 0.97, blue: 0.92, alpha: 1.0)
-                tooth.strokeColor = UIColor.lightGray
-                tooth.lineWidth = 0.4
-                mouth.addChild(tooth)
-            }
-            
-            // Dark gap emphasis where front teeth should be
-            let gap = SKShapeNode(rect: CGRect(x: -1.5, y: mouthY - 1, width: 3, height: 4))
-            gap.fillColor = mouthDark
-            gap.strokeColor = .clear
-            mouth.addChild(gap)
-            
-            // Bottom lip curve
-            let bottomLip = SKShapeNode(path: {
-                let p = UIBezierPath()
-                p.addArc(withCenter: CGPoint(x: 0, y: mouthY - 4), radius: 6, startAngle: -.pi * 0.2, endAngle: -.pi * 0.8, clockwise: true)
-                return p.cgPath
-            }())
-            bottomLip.strokeColor = mouthColor.withAlphaComponent(0.4)
-            bottomLip.lineWidth = 1
-            bottomLip.fillColor = .clear
-            mouth.addChild(bottomLip)
-            
-        case .stella:
-            // Closed-mouth smile showing braces when she smiles
-            let smileW: CGFloat = 14
-            let smileH: CGFloat = 5
-            let smileBg = SKShapeNode(rect: CGRect(x: -smileW / 2, y: mouthY - 1, width: smileW, height: smileH), cornerRadius: 2.5)
-            smileBg.fillColor = UIColor(red: 0.85, green: 0.45, blue: 0.45, alpha: 1.0)
-            smileBg.strokeColor = .clear
-            mouth.addChild(smileBg)
-            
-            // Row of teeth
-            for i in 0..<6 {
-                let tx = CGFloat(i) * 2.2 - 5.5
-                let tooth = SKShapeNode(rect: CGRect(x: tx, y: mouthY - 0.5, width: 2, height: 3.5), cornerRadius: 0.3)
-                tooth.fillColor = UIColor(red: 0.98, green: 0.97, blue: 0.92, alpha: 1.0)
-                tooth.strokeColor = UIColor(white: 0.85, alpha: 1.0)
-                tooth.lineWidth = 0.3
-                mouth.addChild(tooth)
-            }
-            
-            // Braces wire (horizontal line across teeth)
-            let wire = SKShapeNode(rect: CGRect(x: -smileW / 2 + 1, y: mouthY + 0.8, width: smileW - 2, height: 0.8))
-            wire.fillColor = UIColor(red: 0.7, green: 0.72, blue: 0.78, alpha: 1.0)
-            wire.strokeColor = .clear
-            mouth.addChild(wire)
-            
-            // Brackets (small metallic squares on each tooth)
-            for i in 0..<6 {
-                let bx = CGFloat(i) * 2.2 - 5.0
-                let bracket = SKShapeNode(rect: CGRect(x: bx, y: mouthY + 0.2, width: 1.5, height: 1.8), cornerRadius: 0.3)
-                bracket.fillColor = UIColor(red: 0.78, green: 0.8, blue: 0.85, alpha: 1.0)
-                bracket.strokeColor = UIColor(red: 0.6, green: 0.62, blue: 0.68, alpha: 0.8)
-                bracket.lineWidth = 0.3
-                mouth.addChild(bracket)
-            }
-            
-            // Colored elastic bands on brackets (alternating pink/blue)
-            let elasticColors = [
-                UIColor(red: 0.9, green: 0.5, blue: 0.7, alpha: 0.7),
-                UIColor(red: 0.5, green: 0.7, blue: 0.9, alpha: 0.7)
-            ]
-            for i in 0..<6 {
-                let ex = CGFloat(i) * 2.2 - 4.8
-                let elastic = SKShapeNode(circleOfRadius: 0.6)
-                elastic.position = CGPoint(x: ex, y: mouthY + 1.1)
-                elastic.fillColor = elasticColors[i % 2]
-                elastic.strokeColor = .clear
-                mouth.addChild(elastic)
-            }
-            
-            // Lip gloss highlight
-            let gloss = SKShapeNode(ellipseOf: CGSize(width: 4, height: 1.5))
-            gloss.position = CGPoint(x: -2, y: mouthY + 3)
-            gloss.fillColor = .white
-            gloss.strokeColor = .clear
-            gloss.alpha = 0.2
-            mouth.addChild(gloss)
-        }
-        
-        addChild(mouth)
-        mouthNode = mouth
+        // Face texture sprite
+        let texture = FaceRenderer.texture(for: character, expression: .normal)
+        faceSprite = SKSpriteNode(texture: texture, size: CGSize(width: 80, height: 80))
+        faceSprite.position = CGPoint(x: 0, y: headCenterY)
+        faceSprite.zPosition = 1
+        addChild(faceSprite)
     }
     
     // MARK: - Hair
@@ -1316,122 +724,21 @@ class FighterNode: SKNode {
     
     // MARK: - Expression System
     
+    private func mapExpression(_ expr: Expression) -> FaceRenderer.Expression {
+        switch expr {
+        case .normal: return .normal
+        case .attacking: return .attacking
+        case .hurt: return .hurt
+        case .happy: return .happy
+        case .dizzy: return .dizzy
+        }
+    }
+    
     func setExpression(_ expr: Expression) {
         guard expr != currentExpression else { return }
         currentExpression = expr
-        
-        // Update eyebrows
-        switch expr {
-        case .normal, .happy:
-            leftBrow.zRotation = 0.1
-            rightBrow.zRotation = -0.1
-            leftBrow.position = CGPoint(x: -9, y: browY)
-            rightBrow.position = CGPoint(x: 9, y: browY)
-        case .attacking:
-            leftBrow.zRotation = -0.3
-            rightBrow.zRotation = 0.3
-            leftBrow.position = CGPoint(x: -9, y: browY - 1)
-            rightBrow.position = CGPoint(x: 9, y: browY - 1)
-        case .hurt, .dizzy:
-            leftBrow.zRotation = 0.35
-            rightBrow.zRotation = -0.35
-            leftBrow.position = CGPoint(x: -9, y: browY + 2)
-            rightBrow.position = CGPoint(x: 9, y: browY + 2)
-        }
-        
-        // Update eyes
-        switch expr {
-        case .normal, .attacking:
-            leftEyeWhite.yScale = 1.0
-            rightEyeWhite.yScale = 1.0
-        case .hurt:
-            leftEyeWhite.yScale = 0.25
-            rightEyeWhite.yScale = 0.25
-        case .happy:
-            leftEyeWhite.yScale = 0.45
-            rightEyeWhite.yScale = 0.45
-        case .dizzy:
-            leftEyeWhite.yScale = 1.0
-            rightEyeWhite.yScale = 1.0
-            // Spin pupils for dizzy effect
-            let spin = SKAction.rotate(byAngle: .pi * 4, duration: 1.0)
-            leftPupil.run(SKAction.repeatForever(spin), withKey: "dizzy")
-            rightPupil.run(SKAction.repeatForever(spin), withKey: "dizzy")
-        }
-        
-        // Stop dizzy spin for non-dizzy expressions
-        if expr != .dizzy {
-            leftPupil.removeAction(forKey: "dizzy")
-            rightPupil.removeAction(forKey: "dizzy")
-            leftPupil.zRotation = 0
-            rightPupil.zRotation = 0
-        }
-        
-        // Update mouth
-        updateMouth()
-    }
-    
-    private func updateMouth() {
-        mouthNode?.removeFromParent()
-        let mouth = SKNode()
-        mouth.zPosition = 3
-        
-        switch currentExpression {
-        case .normal:
-            buildNormalMouth()
-            return
-        case .attacking:
-            // Open determined mouth
-            let openMouth = SKShapeNode(ellipseOf: CGSize(width: 8, height: 7))
-            openMouth.position = CGPoint(x: 0, y: mouthY)
-            openMouth.fillColor = UIColor(red: 0.5, green: 0.1, blue: 0.1, alpha: 1.0)
-            openMouth.strokeColor = UIColor(red: 0.7, green: 0.25, blue: 0.25, alpha: 1.0)
-            openMouth.lineWidth = 1
-            mouth.addChild(openMouth)
-        case .hurt:
-            // Wavy grimace
-            let grimace = SKShapeNode(path: {
-                let p = UIBezierPath()
-                p.move(to: CGPoint(x: -5, y: mouthY))
-                p.addQuadCurve(to: CGPoint(x: -1.5, y: mouthY), controlPoint: CGPoint(x: -3.5, y: mouthY + 2.5))
-                p.addQuadCurve(to: CGPoint(x: 1.5, y: mouthY), controlPoint: CGPoint(x: 0, y: mouthY - 2.5))
-                p.addQuadCurve(to: CGPoint(x: 5, y: mouthY), controlPoint: CGPoint(x: 3.5, y: mouthY + 2.5))
-                return p.cgPath
-            }())
-            grimace.strokeColor = UIColor(red: 0.7, green: 0.25, blue: 0.25, alpha: 1.0)
-            grimace.lineWidth = 2
-            grimace.fillColor = .clear
-            mouth.addChild(grimace)
-        case .happy:
-            // Big smile
-            let bigSmile = SKShapeNode(path: {
-                let p = UIBezierPath()
-                p.addArc(withCenter: CGPoint(x: 0, y: mouthY + 2), radius: 6, startAngle: CGFloat.pi * 0.15, endAngle: CGFloat.pi * 0.85, clockwise: true)
-                p.addLine(to: CGPoint(x: -5, y: mouthY + 2))
-                p.close()
-                return p.cgPath
-            }())
-            bigSmile.fillColor = UIColor(red: 0.8, green: 0.3, blue: 0.3, alpha: 1.0)
-            bigSmile.strokeColor = .clear
-            mouth.addChild(bigSmile)
-        case .dizzy:
-            // Open mouth with tongue
-            let openM = SKShapeNode(ellipseOf: CGSize(width: 9, height: 7))
-            openM.position = CGPoint(x: 0, y: mouthY)
-            openM.fillColor = UIColor(red: 0.5, green: 0.1, blue: 0.1, alpha: 1.0)
-            openM.strokeColor = UIColor(red: 0.7, green: 0.25, blue: 0.25, alpha: 1.0)
-            openM.lineWidth = 1
-            mouth.addChild(openM)
-            
-            let tongue = SKShapeNode(ellipseOf: CGSize(width: 5, height: 4))
-            tongue.position = CGPoint(x: 1, y: mouthY - 3)
-            tongue.fillColor = UIColor(red: 1.0, green: 0.5, blue: 0.5, alpha: 1.0)
-            tongue.strokeColor = .clear
-            mouth.addChild(tongue)
-        }
-        
-        addChild(mouth)
-        mouthNode = mouth
+        removeAction(forKey: "blink")
+        faceSprite.texture = FaceRenderer.texture(for: character, expression: mapExpression(expr))
     }
     
     // MARK: - Blink
@@ -1440,11 +747,15 @@ class FighterNode: SKNode {
         blinkTimer = 0
         nextBlinkTime = TimeInterval.random(in: 2.5...5.0)
         
-        let close = SKAction.scaleY(to: 0.1, duration: 0.06)
-        let open = SKAction.scaleY(to: currentExpression == .happy ? 0.45 : 1.0, duration: 0.06)
-        let blink = SKAction.sequence([close, open])
-        leftEyeWhite.run(blink)
-        rightEyeWhite.run(blink)
+        faceSprite.texture = FaceRenderer.texture(for: character, expression: .blink)
+        
+        run(SKAction.sequence([
+            SKAction.wait(forDuration: 0.1),
+            SKAction.run { [weak self] in
+                guard let self = self else { return }
+                self.faceSprite.texture = FaceRenderer.texture(for: self.character, expression: self.mapExpression(self.currentExpression))
+            }
+        ]), withKey: "blink")
     }
     
     // MARK: - Actions
@@ -1911,7 +1222,7 @@ class FighterNode: SKNode {
         // Idle head bob
         if currentMove == .idle && isOnGround {
             let bob = sin(CACurrentMediaTime() * 3) * 1.5
-            headNode.position.y = headCenterY + CGFloat(bob)
+            faceSprite.position.y = headCenterY + CGFloat(bob)
         }
     }
     

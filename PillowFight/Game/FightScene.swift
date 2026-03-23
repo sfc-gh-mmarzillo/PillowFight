@@ -373,18 +373,10 @@ class FightScene: SKScene {
         p1HealthBar.addChild(p1HealthFill)
         
         // P1 character face icon
-        let p1Face = SKShapeNode(circleOfRadius: 12)
+        let p1Face = SKSpriteNode(texture: FaceRenderer.texture(for: player1Character, expression: .normal),
+                                  size: CGSize(width: 24, height: 24))
         p1Face.position = CGPoint(x: -14, y: healthBarHeight / 2)
-        p1Face.fillColor = player1Character.shirtColor
-        p1Face.strokeColor = .white
-        p1Face.lineWidth = 1.5
         p1HealthBar.addChild(p1Face)
-        let p1Initial = SKLabelNode(text: String(player1Character.displayName.prefix(1)))
-        p1Initial.fontSize = 10
-        p1Initial.fontName = "AvenirNext-Bold"
-        p1Initial.fontColor = .white
-        p1Initial.verticalAlignmentMode = .center
-        p1Face.addChild(p1Initial)
         
         // P1 Name
         let p1Name = SKLabelNode(text: player1Character.displayName)
@@ -418,18 +410,10 @@ class FightScene: SKScene {
         p2HealthBar.addChild(p2HealthFill)
         
         // P2 character face icon
-        let p2Face = SKShapeNode(circleOfRadius: 12)
+        let p2Face = SKSpriteNode(texture: FaceRenderer.texture(for: player2Character, expression: .normal),
+                                  size: CGSize(width: 24, height: 24))
         p2Face.position = CGPoint(x: healthBarWidth + 14, y: healthBarHeight / 2)
-        p2Face.fillColor = player2Character.shirtColor
-        p2Face.strokeColor = .white
-        p2Face.lineWidth = 1.5
         p2HealthBar.addChild(p2Face)
-        let p2Initial = SKLabelNode(text: String(player2Character.displayName.prefix(1)))
-        p2Initial.fontSize = 10
-        p2Initial.fontName = "AvenirNext-Bold"
-        p2Initial.fontColor = .white
-        p2Initial.verticalAlignmentMode = .center
-        p2Face.addChild(p2Initial)
         
         // P2 Name
         let p2Name = SKLabelNode(text: player2Character.displayName)

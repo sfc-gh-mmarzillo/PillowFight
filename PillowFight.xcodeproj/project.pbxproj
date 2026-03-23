@@ -20,7 +20,8 @@
 		BB000000000000000000000B /* AIController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000B /* AIController.swift */; };
 		BB000000000000000000000C /* GameManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000C /* GameManager.swift */; };
 		BB000000000000000000000D /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000D /* SoundManager.swift */; };
-		BB000000000000000000000E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000E /* Assets.xcassets */; };
+    BB000000000000000000000E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000000E /* Assets.xcassets */; };
+    BB0000000000000000000010 /* FaceRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000010 /* FaceRenderer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,7 +40,8 @@
 		AA000000000000000000000D /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		AA000000000000000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA000000000000000000000F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DD0000000000000000000002 /* PillowFight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PillowFight.app; sourceTree = BUILT_PRODUCTS_DIR; };
+    AA0000000000000000000010 /* FaceRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceRenderer.swift; sourceTree = "<group>"; };
+    DD0000000000000000000002 /* PillowFight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PillowFight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,9 +103,10 @@
 			children = (
 				AA0000000000000000000009 /* FightScene.swift */,
 				AA000000000000000000000A /* FighterNode.swift */,
-				AA000000000000000000000B /* AIController.swift */,
-			);
-			path = Game;
+        AA000000000000000000000B /* AIController.swift */,
+        AA0000000000000000000010 /* FaceRenderer.swift */,
+      );
+      path = Game;
 			sourceTree = "<group>";
 		};
 		CC0000000000000000000006 /* Services */ = {
@@ -204,10 +207,11 @@
 				BB000000000000000000000A /* FighterNode.swift in Sources */,
 				BB000000000000000000000B /* AIController.swift in Sources */,
 				BB000000000000000000000C /* GameManager.swift in Sources */,
-				BB000000000000000000000D /* SoundManager.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+        BB000000000000000000000D /* SoundManager.swift in Sources */,
+        BB0000000000000000000010 /* FaceRenderer.swift in Sources */,
+      );
+      runOnlyForDeploymentPostprocessing = 0;
+    };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
